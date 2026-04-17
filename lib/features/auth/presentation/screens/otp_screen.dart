@@ -86,7 +86,7 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:Color(0xFFFAFAFA),
+      backgroundColor: Color(0xFFFAFAFA),
       body: SafeArea(
         child: Column(
           children: [
@@ -96,7 +96,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 40),
 
                     Center(
                       child: Image.asset(
