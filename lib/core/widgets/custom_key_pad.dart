@@ -34,7 +34,7 @@ class KCustomKeypad extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          height: w * 0.18,
+          height: w * 0.15,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
@@ -43,26 +43,22 @@ class KCustomKeypad extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              FittedBox(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: w * 0.06,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF222222),
-                  ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: w * 0.05,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF222222),
                 ),
               ),
               if (subLabel.isNotEmpty)
-                FittedBox(
-                  child: Text(
-                    subLabel,
-                    style: TextStyle(
-                      fontSize: w * 0.025,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF888888),
-                      letterSpacing: 1.2,
-                    ),
+                Text(
+                  subLabel,
+                  style: TextStyle(
+                    fontSize: w * 0.022,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF888888),
+                    letterSpacing: 1.2,
                   ),
                 ),
             ],
@@ -81,33 +77,43 @@ class KCustomKeypad extends StatelessWidget {
         w * 0.03,
         w * 0.03,
         w * 0.03,
-        w * 0.08, 
+        w * 0.06,
       ),
-      decoration: const BoxDecoration(color: Color(0xFFF2F2F7)),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF2F2F7),
+      ),
       child: Column(
         children: [
-          for (int row = 0; row < 3; row++) ...[
-            Row(
+          for (int row = 0; row < 3; row++)
+            Column(
               children: [
-                for (int col = 0; col < 3; col++) ...[
-                  _buildKey(
-                    context,
-                    _keys[row * 3 + col][0],
-                    _keys[row * 3 + col][1],
-                    () => onKeyTap(_keys[row * 3 + col][0]),
-                  ),
-                  if (col != 2) SizedBox(width: w * 0.01),
-                ],
+                Row(
+                  children: [
+                    for (int col = 0; col < 3; col++)
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            right: col == 2 ? 0 : w * 0.01,
+                          ),
+                          child: _buildKey(
+                            context,
+                            _keys[row * 3 + col][0],
+                            _keys[row * 3 + col][1],
+                            () => onKeyTap(_keys[row * 3 + col][0]),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(height: w * 0.01),
               ],
             ),
-            SizedBox(height: w * 0.01),
-          ],
 
           Row(
             children: [
               Expanded(
                 child: Container(
-                  height: w * 0.18,
+                  height: w * 0.15,
                   decoration: BoxDecoration(
                     color: const Color(0xFFF2F2F7),
                     borderRadius: BorderRadius.circular(10),
@@ -125,15 +131,15 @@ class KCustomKeypad extends StatelessWidget {
                 child: GestureDetector(
                   onTap: onDelete,
                   child: Container(
-                    height: w * 0.18,
+                    height: w * 0.15,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2F2F7),
+    color: const Color(0xFFF2F2F7), 
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.center,
                     child: Icon(
                       Icons.backspace_outlined,
-                      size: w * 0.06,
+                      size: w * 0.05,
                       color: const Color(0xFF444444),
                     ),
                   ),
