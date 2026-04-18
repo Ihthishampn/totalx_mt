@@ -13,6 +13,7 @@ class UserList extends StatefulWidget {
 
 class _UserListState extends State<UserList> {
   final ScrollController _scrollController = ScrollController();
+  bool _loadMoreErrorShown = false;
 
   @override
   void initState() {
@@ -45,6 +46,25 @@ class _UserListState extends State<UserList> {
   Widget build(BuildContext context) {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
+        if (userProvider.state == AppState.error &&
+            userProvider.users.isNotEmpty &&
+            !_loadMoreErrorShown) {
+          _loadMoreErrorShown = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Failed to load more users'),
+                action: SnackBarAction(
+                  label: 'Retry',
+                  onPressed: () => userProvider.loadMoreUsers(),
+                ),
+              ),
+            );
+          });
+        } else if (userProvider.state != AppState.error) {
+          _loadMoreErrorShown = false;
+        }
+
         if (userProvider.state == AppState.loading &&
             userProvider.users.isEmpty) {
           return const Center(child: CircularProgressIndicator());
@@ -130,3 +150,4 @@ class _UserListState extends State<UserList> {
     );
   }
 }
+

@@ -35,21 +35,25 @@ class _UserScreenState extends State<UserScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFEBEBEB),
         appBar: const UserAppBar(),
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              SearchAndFilterRow(
-                onSortTap: () => _showSortSheet(context),
-                onSearchChanged: (query) =>
-                    context.read<UserProvider>().searchUsers(query),
-              ),
-              const SizedBox(height: 16),
-              const SectionTitle(title: "Users Lists"),
-              const SizedBox(height: 10),
-              const Expanded(child: UserList()),
-            ],
+        body: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                SearchAndFilterRow(
+                  onSortTap: () => _showSortSheet(context),
+                  onSearchChanged: (query) =>
+                      context.read<UserProvider>().searchUsers(query),
+                ),
+                const SizedBox(height: 16),
+                const SectionTitle(title: "Users Lists"),
+                const SizedBox(height: 10),
+                const Expanded(child: UserList()),
+              ],
+            ),
           ),
         ),
         floatingActionButton: AddUserFab(
