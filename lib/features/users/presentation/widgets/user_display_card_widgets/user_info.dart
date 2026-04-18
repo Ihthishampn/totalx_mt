@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class UserInfo extends StatelessWidget {
@@ -12,7 +11,12 @@ class UserInfo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text(
+          name,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         const SizedBox(height: 4),
         Text("Age: $age", style: const TextStyle(color: Colors.grey)),
       ],

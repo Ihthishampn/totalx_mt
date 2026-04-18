@@ -50,7 +50,7 @@ class UserAvatarPicker extends StatelessWidget {
                   width: 90,
                   height: 35,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0D3B66).withOpacity(0.9),
+                    color: const Color(0xFF0D3B66).withValues(alpha: 0.9),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.zero,
                       topRight: Radius.zero,

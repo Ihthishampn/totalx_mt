@@ -14,9 +14,11 @@ import 'package:totalx/features/users/presentation/screens/user_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // load keys
   await dotenv.load(fileName: '.env');
+  // load flag of login
   await AuthPreferences.init();
-
+//db init
   await Supabase.initialize(
     url: EnvConfig.supabaseUrl,
     anonKey: EnvConfig.supabaseAnonKey,

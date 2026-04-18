@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-
 class AddUserFormProvider with ChangeNotifier {
   bool _isFormValid = false;
   bool _showErrors = false;

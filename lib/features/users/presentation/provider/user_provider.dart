@@ -15,16 +15,47 @@ class UserProvider with ChangeNotifier {
   String searchQuery = '';
   int selectedSortIndex = 0;
   bool get isSortedByElder => selectedSortIndex == 1;
+  int _currentPage = 0;
+  final int _pageSize = 20;
+  bool hasMore = true;
+  bool isLoadingMore = false;
+  // load uers from supa basee....
+  Future<void> loadUsers({bool reset = true}) async {
+    if (reset) {
+      _setLoading();
+      _currentPage = 0;
+      hasMore = true;
+      _allUsers = [];
+      users = [];
+    } else {
+      if (!hasMore || isLoadingMore) return;
+      isLoadingMore = true;
+      notifyListeners();
+    }
 
-  Future<void> loadUsers() async {
-    _setLoading();
     try {
-      _allUsers = await repo.getUsers();
+      final fetched = await repo.getUsers(page: _currentPage, limit: _pageSize);
+      if (fetched.length < _pageSize) {
+        hasMore = false;
+      }
+
+      _allUsers.addAll(fetched);
+      _currentPage++;
       _applyFilters();
-      _setSuccess();
+
+      if (reset) {
+        _setSuccess();
+      } else {
+        isLoadingMore = false;
+        notifyListeners();
+      }
     } catch (e) {
-      debugPrint('Error loading users: $e');
-      _setError(e.toString());
+      if (reset) {
+        _setError(e.toString());
+      } else {
+        isLoadingMore = false;
+        _setError(e.toString());
+      }
     }
   }
 
@@ -36,20 +67,27 @@ class UserProvider with ChangeNotifier {
     return result;
   }
 
-  Future<void> addUser(String name, String phone, int age, File? image) async {
+  // add user to supabase..
+  Future<void> addUser(String name, int age, File? image) async {
     _setLoading();
     try {
-      final newUser = await repo.addUser(name, phone, age, image);
+      final newUser = await repo.addUser(name, age, image);
       _allUsers.insert(0, newUser);
+      searchQuery = '';
+      selectedSortIndex = 0;
       _applyFilters();
       _justAddedUser = true;
       _setSuccess();
     } catch (e) {
-      debugPrint('Error adding user: $e');
       _setError(e.toString());
     }
   }
 
+  Future<void> loadMoreUsers() async {
+    await loadUsers(reset: false);
+  }
+
+  // search
   void searchUsers(String query) {
     searchQuery = query;
     _applyFilters();
@@ -69,6 +107,7 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // sorting
   void _applyFilters() {
     List<UserModel> filtered = List.from(_allUsers);
 
@@ -77,22 +116,34 @@ class UserProvider with ChangeNotifier {
         final nameMatch = user.name.toLowerCase().contains(
           searchQuery.toLowerCase(),
         );
-        final phoneMatch = user.phone.contains(searchQuery);
         final ageMatch = user.age.toString().contains(searchQuery);
-      
-        return nameMatch || phoneMatch || ageMatch;
+
+        return nameMatch || ageMatch;
       }).toList();
-     
+
+      filtered.sort((a, b) {
+        final query = searchQuery.toLowerCase();
+
+        final aStartsWith =
+            a.name.toLowerCase().startsWith(query) ||
+            a.age.toString().startsWith(searchQuery);
+        final bStartsWith =
+            b.name.toLowerCase().startsWith(query) ||
+            b.age.toString().startsWith(searchQuery);
+
+        if (aStartsWith && !bStartsWith) return -1;
+        if (!aStartsWith && bStartsWith) return 1;
+
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
     }
 
     if (isSortedByElder) {
       filtered = filtered.where((user) => user.age > 60).toList()
         ..sort((a, b) => b.age.compareTo(a.age));
-    
     } else if (selectedSortIndex == 2) {
       filtered = filtered.where((user) => user.age <= 60).toList()
         ..sort((a, b) => b.age.compareTo(a.age));
-    
     }
 
     users = filtered;

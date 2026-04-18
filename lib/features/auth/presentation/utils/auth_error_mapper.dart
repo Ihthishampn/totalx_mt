@@ -1,3 +1,5 @@
+// he;per text for user frndlyy
+
 String getFriendlyOtpSendError(String type, String? message) {
   final lowerMessage = message?.toLowerCase() ?? '';
 

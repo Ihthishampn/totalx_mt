@@ -4,8 +4,42 @@ import 'package:totalx/core/enums/app_state.dart';
 import 'package:totalx/features/users/presentation/provider/user_provider.dart';
 import 'package:totalx/features/users/presentation/widgets/user_display_card_widgets/user_card.dart';
 
-class UserList extends StatelessWidget {
+class UserList extends StatefulWidget {
   const UserList({super.key});
+
+  @override
+  State<UserList> createState() => _UserListState();
+}
+
+class _UserListState extends State<UserList> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final triggerFetchMore =
+        _scrollController.position.maxScrollExtent -
+            _scrollController.position.pixels <=
+        100;
+    if (triggerFetchMore) {
+      final userProvider = context.read<UserProvider>();
+      if (userProvider.hasMore && !userProvider.isLoadingMore) {
+        userProvider.loadMoreUsers();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,17 +105,24 @@ class UserList extends StatelessWidget {
           );
         }
 
+        final itemCount =
+            userProvider.users.length + (userProvider.isLoadingMore ? 1 : 0);
         return ListView.builder(
+          controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          itemCount: userProvider.users.length,
+          itemCount: itemCount,
           itemBuilder: (context, index) {
+            if (index >= userProvider.users.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
             final user = userProvider.users[index];
             return UserCard(
               name: user.name,
               age: user.age,
-              avatarUrl:
-                  user.imageUrl ??
-                  'https://i.pravatar.cc/150?img=3', 
+              avatarUrl: user.imageUrl ?? 'https://plus.unsplash.com/premium_photo-1670455444534-8be2935455ae?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y29sb3IlMjBzcGxhc2h8ZW58MHx8MHx8fDA%3D',
             );
           },
         );

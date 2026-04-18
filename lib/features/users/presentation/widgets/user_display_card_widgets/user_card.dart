@@ -36,7 +36,9 @@ class UserCard extends StatelessWidget {
         children: [
           UserAvatar(imageUrl: avatarUrl),
           const SizedBox(width: 12),
-          UserInfo(name: name, age: age),
+          Expanded(
+            child: UserInfo(name: name, age: age),
+          ),
         ],
       ),
     );

@@ -3,9 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:totalx/features/users/presentation/widgets/location_title.dart';
 
 class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final VoidCallback? onLogout;
-
-  const UserAppBar({super.key, this.onLogout});
+  const UserAppBar({super.key});
 
   @override
   Size get preferredSize => const Size.fromHeight(69);
@@ -15,21 +13,13 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       systemOverlayStyle: const SystemUiOverlayStyle(
         statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-        statusBarColor: Colors.white,
+        statusBarBrightness: Brightness.light,
+        statusBarColor: Colors.black,
       ),
       backgroundColor: Colors.black,
       toolbarHeight: 69,
       title: const LocationTitle(city: "Nilambur"),
       titleTextStyle: const TextStyle(fontSize: 14, color: Colors.white),
-      actions: onLogout != null
-          ? [
-              IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white),
-                onPressed: onLogout,
-              ),
-            ]
-          : null,
     );
   }
 }

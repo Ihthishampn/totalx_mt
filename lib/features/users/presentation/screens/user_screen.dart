@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:totalx/core/enums/app_state.dart';
-import 'package:totalx/core/utils/auth_preferences.dart';
 import 'package:totalx/core/widgets/double_back_press_wrapper.dart';
-import 'package:totalx/features/auth/presentation/provider/auth_provider.dart';
-import 'package:totalx/features/auth/presentation/screens/login_screen.dart';
 import 'package:totalx/features/users/presentation/provider/user_provider.dart';
 import 'package:totalx/features/users/presentation/provider/add_user_form_provider.dart';
 
@@ -37,7 +34,7 @@ class _UserScreenState extends State<UserScreen> {
     return DoubleBackPressWrapper(
       child: Scaffold(
         backgroundColor: const Color(0xFFEBEBEB),
-        appBar: UserAppBar(onLogout: _logout),
+        appBar: const UserAppBar(),
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,13 +97,8 @@ class _UserScreenState extends State<UserScreen> {
               child: AddUserDialog(
                 onSave: userProvider.state == AppState.loading
                     ? null
-                    : (name, phone, age, image) {
-                        context.read<UserProvider>().addUser(
-                          name,
-                          phone,
-                          age,
-                          image,
-                        );
+                    : (name, age, image) {
+                        context.read<UserProvider>().addUser(name, age, image);
                       },
                 isLoading: userProvider.state == AppState.loading,
               ),
@@ -114,20 +106,6 @@ class _UserScreenState extends State<UserScreen> {
           },
         ),
       ),
-    );
-  }
-
-  void _logout() async {
-    final authProvider = context.read<AuthProvider>();
-    final navigator = Navigator.of(context);
-
-    await AuthPreferences.setIsLoggedIn(false);
-    await authProvider.logout();
-    if (!mounted) return;
-
-    navigator.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
     );
   }
 }
