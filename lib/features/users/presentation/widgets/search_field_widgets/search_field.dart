@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class SearchField extends StatelessWidget {
-  const SearchField({super.key});
+  final ValueChanged<String>? onChanged;
+
+  const SearchField({super.key, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -12,18 +14,15 @@ class SearchField extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         border: Border.all(color: Colors.grey.shade400, width: 1),
       ),
-      child: const TextField(
-        decoration: InputDecoration(
+      child: TextField(
+        onChanged: onChanged,
+        decoration: const InputDecoration(
           hintText: "search by name",
           hintStyle: TextStyle(color: Colors.grey),
           border: InputBorder.none,
-          prefixIcon: Icon(
-            Icons.search,
-            color: Color.fromARGB(255, 138, 138, 138),
-          ),
+          prefixIcon: Icon(Icons.search, color: Colors.black),
         ),
       ),
     );
   }
 }
-

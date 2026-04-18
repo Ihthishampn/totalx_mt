@@ -7,13 +7,14 @@ class EnvConfig {
   static String get msg91WidgetId => _get('MSG91_WIDGET_ID');
   static String get msg91TemplateId => _get('MSG91_TEMPLATE_ID');
 
+  static String get supabaseUrl => _get('SUPABASE_URL');
+  static String get supabaseAnonKey => _get('SUPABASE_ANON_KEY');
+
   static String _get(String key) {
     try {
       return dotenv.get(key);
     } catch (error) {
-      throw StateError(
-        'Missing  "$key"'
-      );
+      throw StateError('Missing  "$key"');
     }
   }
 

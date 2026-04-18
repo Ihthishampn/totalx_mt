@@ -5,7 +5,6 @@ import 'package:totalx/core/widgets/double_back_press_wrapper.dart';
 import 'package:totalx/core/widgets/custom_key_pad.dart';
 import 'package:totalx/features/auth/presentation/provider/auth_provider.dart';
 import 'package:totalx/features/auth/presentation/widgets/otp_screen_widgets.dart';
-import 'package:totalx/features/auth/presentation/widgets/otp_dialog_widgets.dart';
 import 'package:totalx/features/users/presentation/screens/user_screen.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -18,13 +17,11 @@ class OtpScreen extends StatefulWidget {
 class _OtpScreenState extends State<OtpScreen> {
   late Timer _resendTimer;
   int _resendSeconds = 59;
-  bool _infoDialogShown = false;
 
   @override
   void initState() {
     super.initState();
     _startResendTimer();
-    _scheduleInfoDialog();
   }
 
   void _startResendTimer() {
@@ -40,33 +37,6 @@ class _OtpScreenState extends State<OtpScreen> {
         });
       }
     });
-  }
-
-  void _scheduleInfoDialog() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 3), () {
-        if (!mounted || _infoDialogShown) return;
-        _infoDialogShown = true;
-        _showStatusDialog();
-      });
-    });
-  }
-
-  void _showStatusDialog() {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final statusCode =
-            authProvider.lastOtpStatusCode?.toString() ?? 'unknown';
-        final responseType = authProvider.lastOtpResponseType ?? 'unknown';
-        return OtpDeliveryStatusDialog(
-          statusCode: statusCode,
-          responseType: responseType,
-        );
-      },
-    );
   }
 
   @override

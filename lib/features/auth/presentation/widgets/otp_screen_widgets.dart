@@ -23,7 +23,6 @@ class OtpScreenSection extends StatelessWidget {
   });
 
   @override
-  
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),

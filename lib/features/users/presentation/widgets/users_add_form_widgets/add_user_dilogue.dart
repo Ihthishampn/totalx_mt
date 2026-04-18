@@ -1,8 +1,66 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:totalx/features/users/presentation/provider/add_user_form_provider.dart';
 import 'package:totalx/features/users/presentation/widgets/users_add_form_widgets/custom_label_field.dart';
+import 'package:totalx/features/users/presentation/widgets/users_add_form_widgets/add_user_dialog_header.dart';
+import 'package:totalx/features/users/presentation/widgets/users_add_form_widgets/user_avatar_picker.dart';
+import 'package:totalx/features/users/presentation/widgets/users_add_form_widgets/add_user_dialog_actions.dart';
 
-class AddUserDialog extends StatelessWidget {
-  const AddUserDialog({super.key});
+class AddUserDialog extends StatefulWidget {
+  final Function(String name, String phone, int age, File? image)? onSave;
+  final bool isLoading;
+
+  const AddUserDialog({super.key, this.onSave, this.isLoading = false});
+
+  @override
+  State<AddUserDialog> createState() => _AddUserDialogState();
+}
+
+class _AddUserDialogState extends State<AddUserDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _ageController = TextEditingController();
+
+  bool _validateFieldsSilently() {
+    final name = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final ageText = _ageController.text.trim();
+
+    if (name.isEmpty) return false;
+    if (phone.isEmpty) return false;
+    if (!RegExp(r'^\d{10}$').hasMatch(phone)) return false;
+    final age = int.tryParse(ageText);
+    if (age == null || age <= 0) return false;
+    return true;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _ageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      if (mounted) {
+        context.read<AddUserFormProvider>().setSelectedImage(
+          File(pickedFile.path),
+        );
+      }
+    }
+  }
+
+  void _updateFormValidity() {
+    final isValid = _validateFieldsSilently();
+    context.read<AddUserFormProvider>().updateFormValidity(isValid);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,127 +70,116 @@ class AddUserDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.symmetric(horizontal: 24),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Add A New User",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF161616),
-              ),
-            ),
-            const SizedBox(height: 25),
-
-            Center(
-              child: SizedBox(
-                width: 90,
-                height: 100,
-                child: Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Color(0xFF5BC8F5), Color(0xFF1A6FD4)],
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.person_rounded,
-                        size: 60,
-                        color: Colors.white,
-                      ),
-                    ),
-
-                    Positioned(
-                      bottom: 5,
-                      child: Container(
-                        width: 90,
-                        height: 35, 
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0D3B66).withOpacity(0.9),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.zero, 
-                            topRight: Radius.zero,
-                            bottomLeft: Radius.circular(
-                              45,
-                            ), 
-                            bottomRight: Radius.circular(45),
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.camera_alt_rounded,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 25),
-
-            const CustomLabelField(label: "Name", hint: "Enter full name"),
-            const SizedBox(height: 16),
-            const CustomLabelField(
-              label: "Age",
-              hint: "Enter age",
-              isNumber: true,
-            ),
-            const SizedBox(height: 30),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.grey.shade100,
-                    foregroundColor: Colors.grey.shade700,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text("Cancel"),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
+        child: Form(
+          key: _formKey,
+          autovalidateMode: context.watch<AddUserFormProvider>().showErrors
+              ? AutovalidateMode.always
+              : AutovalidateMode.disabled,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AddUserDialogHeader(),
+              const SizedBox(height: 25),
+              Center(
+                child: Consumer<AddUserFormProvider>(
+                  builder: (context, formProvider, _) {
+                    return UserAvatarPicker(
+                      selectedImage: formProvider.selectedImage,
+                      onTap: _pickImage,
+                    );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade700,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 28,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text("Save"),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 25),
+              CustomLabelField(
+                label: "Name",
+                hint: "Enter full name",
+                controller: _nameController,
+                onChanged: (_) => _updateFormValidity(),
+                validator: (value) {
+                  if (!context.read<AddUserFormProvider>().showErrors) {
+                    return null;
+                  }
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Name is required';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              CustomLabelField(
+                label: "Phone",
+                hint: "Enter phone number",
+                controller: _phoneController,
+                isNumber: true,
+                maxLength: 10,
+                hideCounter: true,
+                onChanged: (_) => _updateFormValidity(),
+                validator: (value) {
+                  if (!context.read<AddUserFormProvider>().showErrors) {
+                    return null;
+                  }
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Phone is required';
+                  }
+                  final phone = value.trim();
+                  if (!RegExp(r'^\d{10}$').hasMatch(phone)) {
+                    return 'Enter a valid 10-digit phone number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              CustomLabelField(
+                label: "Age",
+                hint: "Enter age",
+                controller: _ageController,
+                isNumber: true,
+                onChanged: (_) => _updateFormValidity(),
+                validator: (value) {
+                  if (!context.read<AddUserFormProvider>().showErrors) {
+                    return null;
+                  }
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Age is required';
+                  }
+                  final age = int.tryParse(value.trim());
+                  if (age == null || age <= 0) {
+                    return 'Enter a valid age';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 30),
+              Consumer<AddUserFormProvider>(
+                builder: (context, formProvider, _) {
+                  return AddUserDialogActions(
+                    isLoading: widget.isLoading,
+                    isFormValid: formProvider.isFormValid,
+                    onCancel: () => Navigator.pop(context),
+                    onSave: () {
+                      formProvider.setShowErrors(true);
+                      final name = _nameController.text.trim();
+                      final phone = _phoneController.text.trim();
+                      final age = int.tryParse(_ageController.text.trim()) ?? 0;
+                      if (!(_formKey.currentState?.validate() ?? false)) {
+                        return;
+                      }
+                      widget.onSave?.call(
+                        name,
+                        phone,
+                        age,
+                        formProvider.selectedImage,
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-

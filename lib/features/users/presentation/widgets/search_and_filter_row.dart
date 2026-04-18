@@ -4,7 +4,13 @@ import 'package:totalx/features/users/presentation/widgets/sort_widgets/sort_but
 
 class SearchAndFilterRow extends StatelessWidget {
   final VoidCallback onSortTap;
-  const SearchAndFilterRow({super.key, required this.onSortTap});
+  final ValueChanged<String>? onSearchChanged;
+
+  const SearchAndFilterRow({
+    super.key,
+    required this.onSortTap,
+    this.onSearchChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +18,7 @@ class SearchAndFilterRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Row(
         children: [
-          const Expanded(child: SearchField()),
+          Expanded(child: SearchField(onChanged: onSearchChanged)),
           const SizedBox(width: 10),
           SortButton(onTap: onSortTap),
         ],
@@ -20,4 +26,3 @@ class SearchAndFilterRow extends StatelessWidget {
     );
   }
 }
-
