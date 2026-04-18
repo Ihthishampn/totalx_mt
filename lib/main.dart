@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:totalx/core/dio_client/dio_client.dart';
+import 'package:totalx/core/utils/auth_preferences.dart';
+import 'package:totalx/features/auth/data/repo_impl/auth_repo_impl.dart';
+import 'package:totalx/features/auth/presentation/provider/auth_provider.dart';
+import 'package:totalx/features/auth/presentation/screens/login_screen.dart';
 import 'package:totalx/features/users/presentation/screens/user_screen.dart';
 
-
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  
-
-  runApp(const MyApp());
+  await dotenv.load(fileName: '.env');
+  await AuthPreferences.init();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(AuthRepoImpl(DioClient())),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,9 +29,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: UserScreen(),
+      home: AuthPreferences.isLoggedIn()
+          ? const UserScreen()
+          : const LoginScreen(),
     );
   }
 }

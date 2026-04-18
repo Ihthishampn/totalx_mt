@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:totalx/core/widgets/double_back_press_wrapper.dart';
 
 import '../widgets/users_add_form_widgets/add_user_dilogue.dart';
 import '../widgets/users_add_form_widgets/add_user_fab.dart';
@@ -13,24 +14,26 @@ class UserScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFEBEBEB),
-      appBar: const UserAppBar(),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 12),
-            SearchAndFilterRow(onSortTap: () => _showSortSheet(context)),
-            const SizedBox(height: 16),
-            const SectionTitle(title: "Users Lists"),
-            const SizedBox(height: 10),
-            const Expanded(child: UserList()),
-          ],
+    return DoubleBackPressWrapper(
+      child: Scaffold(
+        backgroundColor: const Color(0xFFEBEBEB),
+        appBar: const UserAppBar(),
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
+              SearchAndFilterRow(onSortTap: () => _showSortSheet(context)),
+              const SizedBox(height: 16),
+              const SectionTitle(title: "Users Lists"),
+              const SizedBox(height: 10),
+              const Expanded(child: UserList()),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: AddUserFab(
-        onTap: () => _showAddUserDialog(context),
+        floatingActionButton: AddUserFab(
+          onTap: () => _showAddUserDialog(context),
+        ),
       ),
     );
   }
@@ -52,8 +55,3 @@ class UserScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

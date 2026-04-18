@@ -30,39 +30,37 @@ class KCustomKeypad extends StatelessWidget {
   ) {
     final w = MediaQuery.of(context).size.width;
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: w * 0.15,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: w * 0.15,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: w * 0.05,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF222222),
+              ),
+            ),
+            if (subLabel.isNotEmpty)
               Text(
-                label,
+                subLabel,
                 style: TextStyle(
-                  fontSize: w * 0.05,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF222222),
+                  fontSize: w * 0.022,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF888888),
+                  letterSpacing: 1.2,
                 ),
               ),
-              if (subLabel.isNotEmpty)
-                Text(
-                  subLabel,
-                  style: TextStyle(
-                    fontSize: w * 0.022,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF888888),
-                    letterSpacing: 1.2,
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -71,42 +69,31 @@ class KCustomKeypad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
+    final spacing = w * 0.01;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(
-        w * 0.03,
-        w * 0.03,
-        w * 0.03,
-        w * 0.06,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF2F2F7),
-      ),
+      padding: EdgeInsets.fromLTRB(w * 0.03, w * 0.03, w * 0.03, w * 0.06),
+      decoration: const BoxDecoration(color: Color(0xFFF2F2F7)),
       child: Column(
         children: [
           for (int row = 0; row < 3; row++)
-            Column(
-              children: [
-                Row(
-                  children: [
-                    for (int col = 0; col < 3; col++)
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            right: col == 2 ? 0 : w * 0.01,
-                          ),
-                          child: _buildKey(
-                            context,
-                            _keys[row * 3 + col][0],
-                            _keys[row * 3 + col][1],
-                            () => onKeyTap(_keys[row * 3 + col][0]),
-                          ),
-                        ),
+            Padding(
+              padding: EdgeInsets.only(bottom: spacing),
+              child: Row(
+                children: [
+                  for (int col = 0; col < 3; col++) ...[
+                    Expanded(
+                      child: _buildKey(
+                        context,
+                        _keys[row * 3 + col][0],
+                        _keys[row * 3 + col][1],
+                        () => onKeyTap(_keys[row * 3 + col][0]),
                       ),
+                    ),
+                    if (col < 2) SizedBox(width: spacing),
                   ],
-                ),
-                SizedBox(height: w * 0.01),
-              ],
+                ],
+              ),
             ),
 
           Row(
@@ -120,20 +107,16 @@ class KCustomKeypad extends StatelessWidget {
                   ),
                 ),
               ),
-
-              SizedBox(width: w * 0.01),
-
-              _buildKey(context, '0', '', () => onKeyTap('0')),
-
-              SizedBox(width: w * 0.01),
-
+              SizedBox(width: spacing),
+              Expanded(child: _buildKey(context, '0', '', () => onKeyTap('0'))),
+              SizedBox(width: spacing),
               Expanded(
                 child: GestureDetector(
                   onTap: onDelete,
                   child: Container(
                     height: w * 0.15,
                     decoration: BoxDecoration(
-    color: const Color(0xFFF2F2F7), 
+                      color: const Color(0xFFF2F2F7),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.center,
