@@ -46,50 +46,15 @@ class _UserListState extends State<UserList> {
   Widget build(BuildContext context) {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
-        if (userProvider.state == AppState.error &&
-            userProvider.users.isNotEmpty &&
-            !_loadMoreErrorShown) {
-          _loadMoreErrorShown = true;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Failed to load more users'),
-                action: SnackBarAction(
-                  label: 'Retry',
-                  onPressed: () => userProvider.loadMoreUsers(),
-                ),
-              ),
-            );
-          });
-        } else if (userProvider.state != AppState.error) {
-          _loadMoreErrorShown = false;
-        }
+        final users = userProvider.users;
+        final state = userProvider.state;
 
-        if (userProvider.state == AppState.loading &&
-            userProvider.users.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (userProvider.state == AppState.error &&
-            userProvider.users.isEmpty) {
+        if (state == AppState.error && users.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  'Failed to load users',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  userProvider.error ?? 'Unknown error',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
+                const Text('Failed to load users'),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => userProvider.loadUsers(),
@@ -100,49 +65,52 @@ class _UserListState extends State<UserList> {
           );
         }
 
-        if (userProvider.users.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.people_outline, size: 48, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(
-                  'No users found',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  userProvider.searchQuery.isNotEmpty
-                      ? 'Try adjusting your search'
-                      : 'Add your first user',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                ),
-              ],
-            ),
-          );
+        if (state == AppState.loading && users.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
         }
 
-        final itemCount =
-            userProvider.users.length + (userProvider.isLoadingMore ? 1 : 0);
+        if (users.isEmpty) {
+          return const Center(child: Text('No users found'));
+        }
+
+        if (state == AppState.error && !_loadMoreErrorShown) {
+          _loadMoreErrorShown = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Failed to load more users'),
+                action: SnackBarAction(
+                  label: 'Retry',
+                  onPressed: () {
+                    userProvider.loadMoreUsers();
+                    _loadMoreErrorShown = false;
+                  },
+                ),
+              ),
+            );
+          });
+        } else if (state != AppState.error) {
+          _loadMoreErrorShown = false;
+        }
+
         return ListView.builder(
           controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          itemCount: itemCount,
+          itemCount: users.length + (userProvider.isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index >= userProvider.users.length) {
+            if (index >= users.length) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Center(child: CircularProgressIndicator()),
               );
             }
-            final user = userProvider.users[index];
+            final user = users[index];
             return UserCard(
               name: user.name,
               age: user.age,
-              avatarUrl: user.imageUrl ?? 'https://plus.unsplash.com/premium_photo-1670455444534-8be2935455ae?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y29sb3IlMjBzcGxhc2h8ZW58MHx8MHx8fDA%3D',
+              avatarUrl:
+                  user.imageUrl ??
+                  'https://plus.unsplash.com/premium_photo-1670455444534-8be2935455ae?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y29sb3IlMjBzcGxhc2h8ZW58MHx8MHx8fDA%3D',
             );
           },
         );
@@ -150,4 +118,3 @@ class _UserListState extends State<UserList> {
     );
   }
 }
-

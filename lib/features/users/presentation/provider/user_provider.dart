@@ -1,5 +1,7 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:totalx/core/enums/app_state.dart';
 import 'package:totalx/features/users/data/model/user_model.dart';
 import 'package:totalx/features/users/domain/repo/user_repo.dart';
@@ -21,6 +23,9 @@ class UserProvider with ChangeNotifier {
   bool isLoadingMore = false;
   // load uers from supa basee....
   Future<void> loadUsers({bool reset = true}) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return; 
+
     if (reset) {
       _setLoading();
       _currentPage = 0;
@@ -34,7 +39,8 @@ class UserProvider with ChangeNotifier {
     }
 
     try {
-      final fetched = await repo.getUsers(page: _currentPage, limit: _pageSize);
+      final fetched =
+          await repo.getUsers(page: _currentPage, limit: _pageSize, uid: uid);
       if (fetched.length < _pageSize) {
         hasMore = false;
       }
@@ -69,16 +75,29 @@ class UserProvider with ChangeNotifier {
 
   // add user to supabase..
   Future<void> addUser(String name, int age, File? image) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw Exception('User not logged in');
+
+   
+    log('Firebase UID: $uid');
+
     _setLoading();
     try {
-      final newUser = await repo.addUser(name, age, image);
+      // supabse to data
+      final newUser = await repo.addUser(name, age, image, uid);
+      log(' success to database');
+      log(
+          '🆕 New user ID: ${newUser.id}, Name: ${newUser.name}, Age: ${newUser.age}');
+
       _allUsers.insert(0, newUser);
       searchQuery = '';
       selectedSortIndex = 0;
       _applyFilters();
+      // local lissts add
       _justAddedUser = true;
       _setSuccess();
     } catch (e) {
+      log('❌ Error adding user: $e');
       _setError(e.toString());
     }
   }
@@ -114,8 +133,8 @@ class UserProvider with ChangeNotifier {
     if (searchQuery.isNotEmpty) {
       filtered = filtered.where((user) {
         final nameMatch = user.name.toLowerCase().contains(
-          searchQuery.toLowerCase(),
-        );
+              searchQuery.toLowerCase(),
+            );
         final ageMatch = user.age.toString().contains(searchQuery);
 
         return nameMatch || ageMatch;
@@ -124,15 +143,26 @@ class UserProvider with ChangeNotifier {
       filtered.sort((a, b) {
         final query = searchQuery.toLowerCase();
 
-        final aStartsWith =
-            a.name.toLowerCase().startsWith(query) ||
-            a.age.toString().startsWith(searchQuery);
-        final bStartsWith =
-            b.name.toLowerCase().startsWith(query) ||
-            b.age.toString().startsWith(searchQuery);
+        int score(UserModel user) {
+          final name = user.name.toLowerCase();
+          final ageText = user.age.toString();
 
-        if (aStartsWith && !bStartsWith) return -1;
-        if (!aStartsWith && bStartsWith) return 1;
+          if (name == query) return 1000;
+          if (name.startsWith(query)) return 900;
+          if (name.split(' ').any((part) => part.startsWith(query))) return 800;
+          if (name.contains(query)) return 700;
+          if (ageText.startsWith(searchQuery)) return 600;
+          if (ageText.contains(searchQuery)) return 500;
+          return 0;
+        }
+
+        final aScore = score(a);
+        final bScore = score(b);
+        if (aScore != bScore) return bScore.compareTo(aScore);
+
+        final aIndex = a.name.toLowerCase().indexOf(query);
+        final bIndex = b.name.toLowerCase().indexOf(query);
+        if (aIndex != bIndex) return aIndex.compareTo(bIndex);
 
         return a.name.toLowerCase().compareTo(b.name.toLowerCase());
       });
@@ -147,6 +177,7 @@ class UserProvider with ChangeNotifier {
     }
 
     users = filtered;
+    notifyListeners();
   }
 
   void _setLoading() {

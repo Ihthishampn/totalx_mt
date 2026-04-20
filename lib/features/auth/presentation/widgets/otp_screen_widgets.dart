@@ -5,11 +5,11 @@ import 'package:totalx/features/auth/presentation/widgets/kcustom_button.dart';
 import 'package:totalx/features/auth/presentation/widgets/otp_display.dart';
 import 'package:totalx/features/auth/presentation/widgets/otp_error_card.dart';
 import 'package:totalx/features/auth/presentation/widgets/otp_sender_row.dart';
+
 // otp screen break downs all here managing ......
 class OtpScreenSection extends StatelessWidget {
   final AuthProvider authProvider;
   final int resendSeconds;
-  final bool showTestOtp;
   final VoidCallback onResend;
   final VoidCallback onVerify;
   final String Function(String) maskPhone;
@@ -18,7 +18,6 @@ class OtpScreenSection extends StatelessWidget {
     super.key,
     required this.authProvider,
     required this.resendSeconds,
-    required this.showTestOtp,
     required this.onResend,
     required this.onVerify,
     required this.maskPhone,
@@ -63,26 +62,6 @@ class OtpScreenSection extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           OtpDisplay(otp: authProvider.otp),
-          if (showTestOtp) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.yellow.shade100,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.yellow.shade300),
-              ),
-              child: const Text(
-                'Test OTP: 123456',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.orange,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
           if (authProvider.otpError != null) ...[
             const SizedBox(height: 16),
             OtpErrorCard(errorText: authProvider.otpError!),

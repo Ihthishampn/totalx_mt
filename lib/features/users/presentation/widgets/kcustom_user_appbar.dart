@@ -12,14 +12,14 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       systemOverlayStyle: const SystemUiOverlayStyle(
-        statusBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
-        statusBarColor: Colors.black,
+        statusBarColor: Colors.white,
       ),
       backgroundColor: Colors.black,
       toolbarHeight: 69,
+    
       title: const LocationTitle(city: "Nilambur"),
-      titleTextStyle: const TextStyle(fontSize: 14, color: Colors.white),
     );
   }
 }

@@ -10,8 +10,12 @@ class LocationTitle extends StatelessWidget {
       children: [
         const Icon(Icons.location_on_rounded, size: 16, color: Colors.white),
         const SizedBox(width: 6),
-        Text(city),
+        Text(
+          city,
+          style: const TextStyle(fontSize: 14, color: Colors.white),
+        ),
       ],
     );
   }
 }
+ 

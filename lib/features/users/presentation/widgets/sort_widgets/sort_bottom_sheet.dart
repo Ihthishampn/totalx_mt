@@ -32,19 +32,20 @@ class SortBottomSheet extends StatelessWidget {
           const SheetTitle(title: "Sort Users"),
           const SizedBox(height: 16),
           ..._options.asMap().entries.map(
-            (entry) => RadioOptionTile(
-              label: entry.value,
-              isSelected: selected == entry.key,
-              onTap: () {
-                context.read<UserProvider>().setSortIndex(entry.key);
-                onSortSelected?.call(entry.key == 1);
-                Future.delayed(const Duration(milliseconds: 150), () {
-                  if (!navigator.mounted) return;
-                  navigator.pop();
-                });
-              },
-            ),
-          ),
+                (entry) => RadioOptionTile(
+                  label: entry.value,
+                  isSelected: selected == entry.key,
+                  onTap: () {
+                    FocusScope.of(context).unfocus();
+                    context.read<UserProvider>().setSortIndex(entry.key);
+                    onSortSelected?.call(entry.key == 1);
+                    Future.delayed(const Duration(milliseconds: 150), () {
+                      if (!navigator.mounted) return;
+                      navigator.pop();
+                    });
+                  },
+                ),
+              ),
           const SizedBox(height: 10),
         ],
       ),

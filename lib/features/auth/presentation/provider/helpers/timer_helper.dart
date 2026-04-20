@@ -1,16 +1,14 @@
 import 'dart:async';
+
 class TimerHelper {
   Timer? _otpTimer;
   Timer? _resendTimer;
-  Timer? _testOtpTimer;
 
   int otpTimerSeconds = 0;
   int resendSeconds = 59;
-  bool showTestOtp = false;
 
   Function? onOtpTimerTick;
   Function? onResendTimerTick;
-  Function? onTestOtpTimerTick;
 
   void startOtpTimer(int seconds) {
     _otpTimer?.cancel();
@@ -47,17 +45,8 @@ class TimerHelper {
     });
   }
 
-  void startTestOtpTimer() {
-    _testOtpTimer?.cancel();
-    _testOtpTimer = Timer(const Duration(seconds: 3), () {
-      showTestOtp = true;
-      onTestOtpTimerTick?.call();
-    });
-  }
-
   void dispose() {
     _otpTimer?.cancel();
     _resendTimer?.cancel();
-    _testOtpTimer?.cancel();
   }
 }

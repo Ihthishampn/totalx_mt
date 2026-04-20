@@ -17,7 +17,6 @@ class AuthProvider with ChangeNotifier {
   AuthProvider(this.repo) {
     _timerHelper.onOtpTimerTick = notifyListeners;
     _timerHelper.onResendTimerTick = notifyListeners;
-    _timerHelper.onTestOtpTimerTick = notifyListeners;
     _stateHelper.onStateChanged = notifyListeners;
   }
 
@@ -31,7 +30,6 @@ class AuthProvider with ChangeNotifier {
 
   int get otpTimerSeconds => _timerHelper.otpTimerSeconds;
   int get resendSeconds => _timerHelper.resendSeconds;
-  bool get showTestOtp => _timerHelper.showTestOtp;
 
   bool get isPhoneValid => validatePhoneNumber(phone) == null;
   String? get phoneValidationError => validatePhoneNumber(phone);
@@ -52,13 +50,19 @@ class AuthProvider with ChangeNotifier {
     try {
       final response = await repo.sentOtp(phone: phone);
 
+      log(
+        'Send OTP response: success=${response.success}, '
+        'status=${response.statusCode}, '
+        'type=${response.type}, '
+        'message=${response.message}',
+      );
+
       if (response.success && response.statusCode == 200) {
         sentPhone = phone;
         phone = '';
         resetOtp();
         _timerHelper.startOtpTimer(60);
         _timerHelper.startResendTimer();
-        _timerHelper.startTestOtpTimer();
 
         _stateHelper.setLoginSuccess();
         return true;
@@ -115,14 +119,6 @@ class AuthProvider with ChangeNotifier {
     if (!isOtpValid) {
       _stateHelper.setOtpError("Please enter a valid 6-digit OTP");
       return false;
-    }
-
-    if (otp == '123456') {
-      _timerHelper.stopOtpTimer();
-      final authToken = _stateHelper.generateAuthToken(sentPhone);
-      await AuthPreferences.saveLoginSession(sentPhone, authToken: authToken);
-      _stateHelper.setOtpSuccess();
-      return true;
     }
 
     if (isOtpExpired) {
