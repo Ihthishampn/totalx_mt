@@ -1,35 +1,96 @@
-# totalx
+# TotalX
 
-### Packages Used
+## Why am i using both firebase and supabase in this project.
 
-- **provider: ^6.1.5+1** - State management solution for Flutter, used for managing app state across screens.
-- **sendotp_flutter_sdk: ^0.0.2** - SDK for MSG91 phone authentication, handles OTP sending and verification.
-- **flutter_dotenv: ^5.0.4** - Loads environment variables from a .env file for secure API keys and configurations.
-- **dio: ^5.9.2** - HTTP client for making API requests, used for MSG91 OTP services.
-- **shared_preferences: ^2.2.2** - Local storage for simple key-value data, used for saving login sessions and OTP responses.
-- **supabase_flutter: ^2.12.4** - Flutter client for Supabase, used for storing user data, active sort, search, and pagination.
-- **image_picker: ^1.2.1** - Allows picking images from gallery or camera for user profile uploads.
+Initially, as per the task document, I implemented phone authentication using MSG91 and managed user data (add, search, sort) using Supabase so I can use images as well when adding data.
+Later, due to DLT registration requirements (which require organization-level approval), I was advised to switch to Google Sign-In and keep the MSG91 code without removing it.
+To implement Google Sign In with Supabase, it requires Google Cloud OAuth setup (client ID), which needs billing access. Since that was not feasible, I integrated Firebase Authentication for Google Sign-In instead.
+After successful login via Firebase, user data is stored and managed in Supabase as before.
+Current flow:
+Firebase Authentication → Supabase Database
 
-### Architecture & Folder Structure
 
-Used **MVVM (Model-View-ViewModel)** architecture for clean separation of concerns. Folder structure follows Clean Architecture principles:
+## Packages Used
+- provider → State management
+- sendotp_flutter_sdk → MSG91 OTP authentication
+- flutter_dotenv → Secure API key management
+- dio → API handling
+- shared_preferences → Local storage
+- supabase_flutter → Backend (users, search, pagination)
+- image_picker → Image selection
+- google_sign_in → Google authentication
+- firebase_auth → Firebase authentication
 
-- **lib/features/** - Feature-based organization (auth, users).
-  - **auth/** - Authentication logic (domain, data, presentation layers).
-  - **users/** - User management (domain, data, presentation layers).
-- **lib/core/** - Shared utilities (enums, utils, widgets).
-- **lib/main.dart** - App entry point.
-- **assets/** - Static assets like images.
-- **.env** - Environment variables for API keys.
+---
 
-### Login Flow
+## Architecture
+Used MVVM with Clean Architecture principles for clear separation of concerns.
 
-1. **Login Screen**: User enters phone number (10 digits max).
-2. **OTP Screen**: Sends OTP via MSG91 server (returns 200 success). Shows 60-second timer.
-3. **Resend**: Can resend after 60 seconds (timer resets).
-4. **Demo OTP**: After 3 sec OTP sends, `123456` becomes available for login. This is because we have no DLT template (no organization owned by me), so real OTPs don't reach the device. Code shows server success (200), but no actual SMS delivery. Demo OTP bypasses this for testing.
+### Folder Structure
+lib/
+ ├── core/
+ │   ├── enums/
+ │   ├── utils/
+ │   └── widgets/
+ ├── features/
+ │   ├── auth/
+ │   │   ├── data/
+ │   │   ├── domain/
+ │   │   └── presentation/
+ │   └── users/
+ │       ├── data/
+ │       ├── domain/
+ │       └── presentation/
+ └── main.dart
 
-### User Screen
+---
 
-- **Add Floating Button**: Opens dialog for adding users with proper form validation (name, phone, age, image).
-- **Data Fetching**: Uses Supabase with direct URL (no auth required), keys stored in .env file. Implements lazy loading with pagination via Supabase `.range()`, search by name/phone, and sorting by age (above/below 60).
+## Error Handling
+- No internet → shows error message with retry button  
+- Supports retry when connection is restored  
+
+---
+
+## Authentication Flow
+
+### Old Flow (Reference)
+- Phone number login (10 digits)
+- OTP via MSG91 (API returns 200 OK)
+- SMS not delivered due to pending DLT approval
+- Demo OTP used: **123456**
+
+### Current Flow
+- Google Sign-In using Firebase
+- Firebase UID generated
+- User stored in Supabase
+- Navigate to Home screen
+
+---
+
+## User Features
+
+### Add User
+- Form dialog with:
+  - Name
+  - Age
+  - Image (validated)
+
+### Data Handling
+- Supabase (no auth)
+- API keys stored in `.env`
+
+### Features
+- Pagination implemented 
+- Search (name & age)
+- Sort users (above/below 60)
+- Double back press to exit
+- PopScope for search handling
+
+---
+
+## Key Highlights
+- Clean architecture implemented
+- Scalable structure
+- Secure environment variables
+- Efficient data loading with pagination
+- no intrenet error handled with retry button and triggering data again once data back.
